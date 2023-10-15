@@ -8,6 +8,7 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import styles from "./tailwind.css";
+import { Analytics } from "@vercel/analytics/react";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: styles }];
 
@@ -25,6 +26,7 @@ export default function App() {
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
+        <Analytics />
       </body>
     </html>
   );
