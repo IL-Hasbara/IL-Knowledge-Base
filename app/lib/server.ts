@@ -1,4 +1,8 @@
-import { Client, Databases, Models } from 'node-appwrite';
+import { json } from '@remix-run/node';
+import { Client, Databases, Models, ID, Query } from 'node-appwrite';
+import { randomBytes } from 'crypto';
+
+const key = randomBytes(10).toString('hex');
 
 declare global {
   namespace NodeJS {
@@ -8,6 +12,7 @@ declare global {
       BACKEND_API_KEY: string;
       BACKEND_LINKS_DB_ID: string;
       BACKEND_PUBLIC_LINKS_COLLECTION_ID: string;
+      BACKEND_ACCESS_KEYS_COLLECTION_ID: string;
     }
   }
 }
@@ -30,7 +35,7 @@ client
   .setKey(process.env.BACKEND_API_KEY)
   .setSelfSigned();
 
-interface Item extends Models.Document {
+interface LinkItem extends Models.Document {
   label?: string;
   link: string;
   tags: string[];
@@ -42,6 +47,48 @@ export async function fetchPublicLinks() {
     BACKEND_LINKS_DB_ID: dbId,
     BACKEND_PUBLIC_LINKS_COLLECTION_ID: colId
    } = process.env;
-  const docs = await db.listDocuments<Item>(dbId, colId);
+  const docs = await db.listDocuments<LinkItem>(dbId, colId);
   return docs.documents;
+}
+
+type SubmittedLinkPayload = {
+  key: string;
+  link: string;
+  label: string;
+  tags: string[];
+}
+export async function submitLink({ key: accessKey, ...payload }: SubmittedLinkPayload) {
+  const db = new Databases(client);
+  const { 
+    BACKEND_LINKS_DB_ID: dbId,
+    BACKEND_PUBLIC_LINKS_COLLECTION_ID: colId
+   } = process.env;
+
+  await validateAccessKey(accessKey);
+
+
+  const linkItem = await db.createDocument<LinkItem>(dbId, colId, ID.unique(), payload);
+  return json({ link: linkItem, error: null });
+}
+
+interface AccessKeyItem extends Models.Document {
+  key: string;
+  active: boolean;
+  holder: string;
+  email: string;
+  acquired: string;
+}
+export async function validateAccessKey(key: string) {
+  const db = new Databases(client);
+  const { 
+    BACKEND_LINKS_DB_ID: dbId,
+    BACKEND_ACCESS_KEYS_COLLECTION_ID: accessKeyColId
+   } = process.env;
+
+  const accessKeys = await db.listDocuments<AccessKeyItem>(dbId, accessKeyColId, [Query.equal('key', key)]);
+  if (typeof accessKeys?.documents?.[0]?.active === 'boolean' && accessKeys.documents[0].active) {
+    return accessKeys.documents[0];
+  }
+
+  throw new Error('Invalid access key!');
 }
