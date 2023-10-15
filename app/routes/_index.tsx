@@ -23,8 +23,13 @@ import { useToast } from "~/components/ui/use-toast";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "IL Knowledge Base" },
+    {
+      name: "description",
+      content:
+        "Tag and search for videos regarding Israel-Hamas War for the purpose of Hasbara",
+      ["og:image"]: "/social-preview.png",
+    },
   ];
 };
 
