@@ -91,7 +91,14 @@ export default function Index() {
   return (
     <div className="h-screen bg-slate-950">
       <main className="w-full h-full flex flex-col items-center max-w-[70%] mx-auto py-20">
-        <SubmitLinkDialog />
+        <div className="grid place-items-center mb-8 w-full">
+          <img
+            src="/social-preview.png"
+            alt="Israel flag"
+            className="h-20 col-start-1 row-start-1"
+          />
+          <SubmitLinkDialog className="col-start-1 row-start-1 justify-self-end" />
+        </div>
 
         <h1 className="text-white text-4xl font-bold">IL Knowledge Base</h1>
         <p className="text-slate-400 max-w-[75ch] text-center mt-4">
@@ -164,7 +171,7 @@ export default function Index() {
   );
 }
 
-function SubmitLinkDialog() {
+function SubmitLinkDialog({ className }: { className?: string }) {
   const [tags, setTags] = useState<Tag[]>([]);
 
   return (
@@ -174,7 +181,7 @@ function SubmitLinkDialog() {
       }}
     >
       <DialogTrigger asChild>
-        <Button type="button" variant="secondary" className="self-end mb-8">
+        <Button type="button" variant="secondary" className={className}>
           Submit link
         </Button>
       </DialogTrigger>
